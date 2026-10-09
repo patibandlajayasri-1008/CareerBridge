@@ -32,8 +32,19 @@ export function StudentProvider({ children }) {
 
   const [profile, setProfile] = useState(() => {
     try {
-      const saved = localStorage.getItem('careerbridge_student_profile');
-      return saved ? JSON.parse(saved) : INITIAL_STUDENT_PROFILE;
+      if (authUser && authUser.email) {
+        const scopedKey = `careerbridge_student_profile_${authUser.email.toLowerCase()}`;
+        const savedScoped = localStorage.getItem(scopedKey);
+        if (savedScoped) return JSON.parse(savedScoped);
+        return {
+          ...authUser,
+          id: authUser._id || authUser.id,
+          resume: Boolean(authUser.resume?.fileName || authUser.resume?.originalName) ? authUser.resume : null,
+          skills: authUser.skills || [],
+          preferredRoles: authUser.preferredRoles || [],
+        };
+      }
+      return INITIAL_STUDENT_PROFILE;
     } catch {
       return INITIAL_STUDENT_PROFILE;
     }
@@ -41,10 +52,18 @@ export function StudentProvider({ children }) {
 
   const [applications, setApplications] = useState(() => {
     try {
-      const saved = localStorage.getItem('careerbridge_student_apps');
-      return saved ? JSON.parse(saved) : INITIAL_STUDENT_APPLICATIONS;
-    } catch {
+      if (authUser && authUser.email) {
+        const scopedKey = `careerbridge_student_apps_${authUser.email.toLowerCase()}`;
+        const savedScoped = localStorage.getItem(scopedKey);
+        if (savedScoped) return JSON.parse(savedScoped);
+        if (authUser.email.toLowerCase() === 'alex.chen@university.edu') {
+          return INITIAL_STUDENT_APPLICATIONS;
+        }
+        return [];
+      }
       return INITIAL_STUDENT_APPLICATIONS;
+    } catch {
+      return [];
     }
   });
 
@@ -74,8 +93,13 @@ export function StudentProvider({ children }) {
 
       // Fetch live applications
       const appRes = await applicationService.getMyApplications();
-      if (appRes.success && appRes.data?.applications?.length > 0) {
-        const normalized = appRes.data.applications.map(normalizeApplication);
+      if (appRes.success) {
+        const list = Array.isArray(appRes.data)
+          ? appRes.data
+          : Array.isArray(appRes.data?.applications)
+          ? appRes.data.applications
+          : [];
+        const normalized = list.map(normalizeApplication);
         setApplications(normalized);
       }
     } catch {
@@ -88,10 +112,12 @@ export function StudentProvider({ children }) {
   // Sync student state whenever auth user changes
   useEffect(() => {
     if (isAuthenticated && authUser && authUser.role === 'student') {
+      const email = authUser.email.toLowerCase();
       const hasValidResume = Boolean(authUser.resume && (authUser.resume.fileName || authUser.resume.originalName));
+
+      // Reset profile to logged in student
       setProfile((prev) => {
-        // If switching to a different user, discard the old user's cached profile
-        if (prev.email && prev.email.toLowerCase() !== authUser.email.toLowerCase()) {
+        if (prev.email && prev.email.toLowerCase() !== email) {
           return {
             ...authUser,
             id: authUser._id || authUser.id,
@@ -107,26 +133,48 @@ export function StudentProvider({ children }) {
           resume: hasValidResume ? authUser.resume : prev.resume,
         };
       });
+
+      // Strict Application Isolation: Only demo account sees demo apps; any real/new email starts clean
+      const storageKey = `careerbridge_student_apps_${email}`;
+      const savedApps = localStorage.getItem(storageKey);
+      if (savedApps) {
+        try {
+          setApplications(JSON.parse(savedApps));
+        } catch {
+          setApplications([]);
+        }
+      } else {
+        if (email === 'alex.chen@university.edu') {
+          setApplications(INITIAL_STUDENT_APPLICATIONS);
+        } else {
+          setApplications([]);
+        }
+      }
+
       refreshBackendData();
     }
   }, [isAuthenticated, authUser, refreshBackendData]);
 
-  // Save changes to localStorage for offline persistence
+  // Save changes to scoped localStorage for offline persistence
   useEffect(() => {
-    try {
-      localStorage.setItem('careerbridge_student_profile', JSON.stringify(profile));
-    } catch (e) {
-      console.warn('Unable to persist profile to localStorage', e);
+    if (authUser && authUser.email) {
+      try {
+        localStorage.setItem(`careerbridge_student_profile_${authUser.email.toLowerCase()}`, JSON.stringify(profile));
+      } catch (e) {
+        console.warn('Unable to persist profile to localStorage', e);
+      }
     }
-  }, [profile]);
+  }, [profile, authUser]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('careerbridge_student_apps', JSON.stringify(applications));
-    } catch (e) {
-      console.warn('Unable to persist applications to localStorage', e);
+    if (authUser && authUser.email) {
+      try {
+        localStorage.setItem(`careerbridge_student_apps_${authUser.email.toLowerCase()}`, JSON.stringify(applications));
+      } catch (e) {
+        console.warn('Unable to persist applications to localStorage', e);
+      }
     }
-  }, [applications]);
+  }, [applications, authUser]);
 
   // Dynamic Profile Completeness Calculation
   const profileCompleteness = useMemo(() => {
