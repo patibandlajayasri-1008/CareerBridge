@@ -96,13 +96,12 @@ const userSchema = new mongoose.Schema(
 );
 
 // Automatic Password Hashing Hook
-userSchema.pre('save', async function (next) {
+userSchema.pre('save', async function () {
   if (!this.isModified('password')) {
-    return next();
+    return;
   }
   const salt = await bcrypt.genSalt(12);
   this.password = await bcrypt.hash(this.password, salt);
-  next();
 });
 
 // Instance Method: Compare candidate password with stored bcrypt hash
@@ -111,7 +110,6 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
 };
 
 // Query Performance Indexes
-userSchema.index({ email: 1 });
 userSchema.index({ role: 1 });
 userSchema.index({ graduationYear: 1 });
 

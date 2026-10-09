@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import request from 'supertest';
+import mongoose from 'mongoose';
 import app from '../src/app.js';
 import User from '../src/models/User.js';
 import { generateToken, verifyJwt } from '../src/utils/token.js';
@@ -30,6 +31,7 @@ describe('Authentication & Authorization Engine Tests', () => {
 
   describe('Password Cryptography in User Model', () => {
     it('automatically salts and hashes plaintext password before saving', async () => {
+      mongoose.set('bufferCommands', false);
       const user = new User({
         name: 'Crypt Test User',
         email: 'crypt@test.edu',
