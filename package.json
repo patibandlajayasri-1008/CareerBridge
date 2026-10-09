@@ -1,0 +1,22 @@
+{
+  "name": "careerbridge",
+  "version": "1.0.0",
+  "description": "CareerBridge — Student Placement Platform",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix client run dev",
+    "dev:client": "npm --prefix client run dev",
+    "dev:server": "npm --prefix server run dev",
+    "build": "npm --prefix client run build",
+    "test:client": "npm --prefix client test",
+    "test:server": "npm --prefix server test",
+    "test": "npm --prefix server test && npm --prefix client test"
+  },
+  "keywords": [
+    "mern",
+    "careerbridge",
+    "placement-management"
+  ],
+  "author": "CareerBridge Team",
+  "license": "ISC"
+}
