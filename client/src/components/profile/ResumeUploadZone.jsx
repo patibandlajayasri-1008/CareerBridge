@@ -69,7 +69,7 @@ export default function ResumeUploadZone({ resume, onResumeUpload, onResumeRemov
         </div>
       </div>
 
-      {resume ? (
+      {resume && (resume.fileName || resume.originalName) ? (
         /* Uploaded File Card */
         <div className="p-4 rounded-xl border border-[#168568]/30 bg-emerald-50/40 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">

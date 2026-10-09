@@ -141,27 +141,60 @@ export default function ApplicationReviewModal({
         </div>
 
         {/* Candidate Resume Inspection Box */}
-        <div className="p-3.5 rounded-xl border border-[#E4E8F0] bg-[#F8FAFC] flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-emerald-100 text-[#168568] flex items-center justify-center">
-              <FileText className="w-4 h-4" />
+        {(() => {
+          const resume = student.resume || application.resumeSnapshot;
+          const hasResume = Boolean(resume && (resume.originalName || resume.fileName));
+          const resumeName =
+            resume?.originalName ||
+            resume?.fileName ||
+            (student.name ? `${student.name.replace(/\s+/g, '_')}_Resume.pdf` : null);
+          const resumeFileName = resume?.fileName || resumeName;
+
+          if (hasResume || resumeName) {
+            return (
+              <div className="p-3.5 rounded-xl border border-[#168568]/30 bg-emerald-50/40 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-100 text-[#168568] flex items-center justify-center shrink-0">
+                    <FileText className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-[#14213D] truncate">
+                      {resumeName}
+                    </p>
+                    <p className="text-[10px] text-[#667085]">
+                      {resume?.size ? `${(resume.size / (1024 * 1024)).toFixed(2)} MB • ` : ''}Verified Candidate Resume
+                    </p>
+                  </div>
+                </div>
+                <a
+                  href={`http://localhost:5000/api/v1/users/resume/${encodeURIComponent(resumeFileName)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#3157D5] hover:bg-[#2444b0] text-white text-xs font-semibold transition-colors shrink-0"
+                >
+                  <span>View Resume PDF</span>
+                </a>
+              </div>
+            );
+          }
+
+          return (
+            <div className="p-3.5 rounded-xl border border-dashed border-[#CBD5E1] bg-[#F8FAFC] flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-gray-100 text-[#667085] flex items-center justify-center">
+                  <FileText className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-[#667085]">No resume uploaded yet</p>
+                  <p className="text-[10px] text-[#94A3B8]">Candidate has not uploaded a verified PDF file</p>
+                </div>
+              </div>
+              <span className="text-[10px] font-semibold text-[#667085] px-2 py-0.5 rounded bg-[#F1F5F9] border border-[#E2E8F0]">
+                Pending Upload
+              </span>
             </div>
-            <div>
-              <p className="text-xs font-semibold text-[#14213D]">
-                {student.resume?.originalName || student.resume?.fileName || application.resumeSnapshot?.originalName || 'Candidate_Resume.pdf'}
-              </p>
-              <p className="text-[10px] text-[#667085]">Verified PDF Document</p>
-            </div>
-          </div>
-          <a
-            href={`http://localhost:5000/api/v1/users/resume/${encodeURIComponent(student.resume?.fileName || application.resumeSnapshot?.fileName || 'resume.pdf')}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#3157D5] hover:bg-[#2444b0] text-white text-xs font-semibold transition-colors"
-          >
-            <span>View Resume PDF</span>
-          </a>
-        </div>
+          );
+        })()}
 
         {/* Status Transition & Review Form */}
         <form onSubmit={handleSave} className="space-y-4 pt-2 border-t border-[#F1F5F9]">

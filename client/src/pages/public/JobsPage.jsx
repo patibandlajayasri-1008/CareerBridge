@@ -7,6 +7,7 @@ import JobCard from '../../components/jobs/JobCard';
 import JobFilterBar from '../../components/jobs/JobFilterBar';
 import Pagination from '../../components/jobs/Pagination';
 import Button from '../../components/common/Button';
+import ApplyJobModal from '../../components/jobs/ApplyJobModal';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import { useStudent } from '../../context/StudentContext';
@@ -32,7 +33,11 @@ export default function JobsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { showToast } = useToast();
   const { isAuthenticated, isStudent } = useAuth();
-  const { applyForJob } = useStudent();
+  const { applyForJob, profile, uploadResume, hasApplied } = useStudent();
+
+  const [selectedJobForApply, setSelectedJobForApply] = useState(null);
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  const [isApplying, setIsApplying] = useState(false);
 
   const [apiJobs, setApiJobs] = useState(null);
 
@@ -159,7 +164,7 @@ export default function JobsPage() {
 
   const totalPages = Math.ceil(filteredJobs.length / itemsPerPage);
 
-  const handleApplyClick = async (job) => {
+  const handleApplyClick = (job) => {
     if (!isAuthenticated) {
       showToast(
         `To apply for ${job.title} at ${job.company}, please sign in or register your student account.`,
@@ -173,11 +178,27 @@ export default function JobsPage() {
       return;
     }
 
-    const res = await applyForJob(job);
-    if (res.success) {
-      showToast(res.message, 'success');
-    } else {
-      showToast(res.message, 'error');
+    if (hasApplied(job._id || job.id)) {
+      showToast('You have already submitted an application for this drive.', 'info');
+      return;
+    }
+
+    setSelectedJobForApply(job);
+    setIsApplyModalOpen(true);
+  };
+
+  const handleConfirmApply = async (job, coverNote) => {
+    try {
+      setIsApplying(true);
+      const res = await applyForJob(job, coverNote);
+      if (res.success) {
+        showToast(res.message, 'success');
+        setIsApplyModalOpen(false);
+      } else {
+        showToast(res.message, 'error');
+      }
+    } finally {
+      setIsApplying(false);
     }
   };
 
@@ -246,6 +267,17 @@ export default function JobsPage() {
           />
         </div>
       )}
+
+      {/* 3-Step Apply Modal: Review details & attach resume */}
+      <ApplyJobModal
+        isOpen={isApplyModalOpen}
+        onClose={() => setIsApplyModalOpen(false)}
+        job={selectedJobForApply}
+        profile={profile}
+        onConfirmApply={handleConfirmApply}
+        onResumeUpload={uploadResume}
+        isLoading={isApplying}
+      />
     </div>
   );
 }

@@ -29,7 +29,7 @@ import { adminService } from '../../services/adminService';
 import { SAMPLE_JOBS } from '../../data/sampleJobs';
 import { INITIAL_STUDENT_APPLICATIONS, INITIAL_STUDENT_PROFILE } from '../../data/sampleStudent';
 
-// Fallback seed admin data for preview/testing
+// Fallback seed admin data for preview/testing with distinct resumes per student
 const SEED_APPLICATIONS = [
   {
     id: 'app-seed-1',
@@ -39,6 +39,11 @@ const SEED_APPLICATIONS = [
     company: 'Cognizant Technology Solutions',
     status: 'Shortlisted',
     appliedAt: '2026-03-24T10:30:00.000Z',
+    resumeSnapshot: {
+      originalName: 'Alex_Chen_SWE_Resume.pdf',
+      fileName: 'Alex_Chen_SWE_Resume.pdf',
+      size: 1420000,
+    },
     student: {
       name: 'Alex Chen',
       email: 'alex.chen@university.edu',
@@ -47,6 +52,11 @@ const SEED_APPLICATIONS = [
       graduationYear: 2026,
       cgpa: '8.8',
       skills: ['React', 'Node.js', 'MongoDB', 'Python', 'Tailwind CSS'],
+      resume: {
+        originalName: 'Alex_Chen_SWE_Resume.pdf',
+        fileName: 'Alex_Chen_SWE_Resume.pdf',
+        size: 1420000,
+      },
     },
   },
   {
@@ -57,6 +67,11 @@ const SEED_APPLICATIONS = [
     company: 'Zoho Corporation',
     status: 'Under Review',
     appliedAt: '2026-03-27T14:15:00.000Z',
+    resumeSnapshot: {
+      originalName: 'Priya_Sharma_FullStack_Resume.pdf',
+      fileName: 'Priya_Sharma_FullStack_Resume.pdf',
+      size: 1180000,
+    },
     student: {
       name: 'Priya Sharma',
       email: 'priya.sharma@university.edu',
@@ -65,6 +80,11 @@ const SEED_APPLICATIONS = [
       graduationYear: 2026,
       cgpa: '9.2',
       skills: ['Java', 'Spring Boot', 'React', 'SQL'],
+      resume: {
+        originalName: 'Priya_Sharma_FullStack_Resume.pdf',
+        fileName: 'Priya_Sharma_FullStack_Resume.pdf',
+        size: 1180000,
+      },
     },
   },
   {
@@ -75,6 +95,11 @@ const SEED_APPLICATIONS = [
     company: 'Deloitte USI',
     status: 'Selected',
     appliedAt: '2026-03-20T09:00:00.000Z',
+    resumeSnapshot: {
+      originalName: 'Rahul_Verma_DataScientist_Resume.pdf',
+      fileName: 'Rahul_Verma_DataScientist_Resume.pdf',
+      size: 2050000,
+    },
     student: {
       name: 'Rahul Verma',
       email: 'rahul.verma@university.edu',
@@ -83,6 +108,11 @@ const SEED_APPLICATIONS = [
       graduationYear: 2025,
       cgpa: '8.5',
       skills: ['Python', 'Django', 'PostgreSQL', 'Docker'],
+      resume: {
+        originalName: 'Rahul_Verma_DataScientist_Resume.pdf',
+        fileName: 'Rahul_Verma_DataScientist_Resume.pdf',
+        size: 2050000,
+      },
     },
   },
   {
@@ -93,6 +123,11 @@ const SEED_APPLICATIONS = [
     company: 'Infosys Limited',
     status: 'Applied',
     appliedAt: '2026-03-29T16:45:00.000Z',
+    resumeSnapshot: {
+      originalName: 'Sneha_Patel_CloudDevOps_Resume.pdf',
+      fileName: 'Sneha_Patel_CloudDevOps_Resume.pdf',
+      size: 1640000,
+    },
     student: {
       name: 'Sneha Patel',
       email: 'sneha.patel@university.edu',
@@ -101,6 +136,11 @@ const SEED_APPLICATIONS = [
       graduationYear: 2026,
       cgpa: '8.4',
       skills: ['Linux', 'AWS', 'Docker', 'Bash', 'Git'],
+      resume: {
+        originalName: 'Sneha_Patel_CloudDevOps_Resume.pdf',
+        fileName: 'Sneha_Patel_CloudDevOps_Resume.pdf',
+        size: 1640000,
+      },
     },
   },
 ];

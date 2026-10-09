@@ -18,6 +18,7 @@ import { SAMPLE_JOBS } from '../../data/sampleJobs';
 import { jobService } from '../../services/jobService';
 import Button from '../../components/common/Button';
 import Badge from '../../components/common/Badge';
+import ApplyJobModal from '../../components/jobs/ApplyJobModal';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import { useStudent } from '../../context/StudentContext';
@@ -58,13 +59,14 @@ export default function JobDetailPage() {
   const { id } = useParams();
   const { showToast } = useToast();
   const { isAuthenticated, isStudent, isAdmin } = useAuth();
-  const { hasApplied, applyForJob } = useStudent();
+  const { hasApplied, applyForJob, profile, uploadResume } = useStudent();
 
   const [job, setJob] = useState(() => {
     return SAMPLE_JOBS.find((j) => j.id === id) || null;
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
 
   // Fetch from backend API with fallback
   const fetchJob = useCallback(async () => {
@@ -123,7 +125,7 @@ export default function JobDetailPage() {
         (j.requiredSkills || []).some((s) => (job.requiredSkills || []).includes(s)))
   ).slice(0, 3);
 
-  const handleApply = async () => {
+  const handleApply = () => {
     if (!isAuthenticated) {
       showToast(
         `To submit your profile for ${job.title}, please sign in or register your student account.`,
@@ -142,11 +144,16 @@ export default function JobDetailPage() {
       return;
     }
 
+    setIsApplyModalOpen(true);
+  };
+
+  const handleConfirmApply = async (appliedJob, coverNote) => {
     try {
       setIsApplying(true);
-      const res = await applyForJob(job);
+      const res = await applyForJob(appliedJob, coverNote);
       if (res.success) {
         showToast(res.message, 'success');
+        setIsApplyModalOpen(false);
       } else {
         showToast(res.message, 'error');
       }
@@ -436,6 +443,17 @@ export default function JobDetailPage() {
           )}
         </div>
       </div>
+
+      {/* 3-Step Apply Modal: Review details & attach resume */}
+      <ApplyJobModal
+        isOpen={isApplyModalOpen}
+        onClose={() => setIsApplyModalOpen(false)}
+        job={job}
+        profile={profile}
+        onConfirmApply={handleConfirmApply}
+        onResumeUpload={uploadResume}
+        isLoading={isApplying}
+      />
     </div>
   );
 }

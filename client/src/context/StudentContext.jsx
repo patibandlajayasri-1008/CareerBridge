@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useMemo, useCall
 import { INITIAL_STUDENT_PROFILE, INITIAL_STUDENT_APPLICATIONS } from '../data/sampleStudent';
 import { userService } from '../services/userService';
 import { applicationService } from '../services/applicationService';
+import { useAuth } from './AuthContext';
 
 const StudentContext = createContext(null);
 
@@ -27,6 +28,8 @@ const normalizeApplication = (app) => ({
 });
 
 export function StudentProvider({ children }) {
+  const { user: authUser, isAuthenticated } = useAuth();
+
   const [profile, setProfile] = useState(() => {
     try {
       const saved = localStorage.getItem('careerbridge_student_profile');
@@ -57,11 +60,15 @@ export function StudentProvider({ children }) {
       // Fetch live user profile
       const profRes = await userService.getProfile();
       if (profRes.success && profRes.data?.user) {
+        const u = profRes.data.user;
+        const hasValidResume = Boolean(u.resume && (u.resume.fileName || u.resume.originalName));
         setProfile((prev) => ({
           ...prev,
-          ...profRes.data.user,
-          skills: profRes.data.user.skills || prev.skills || [],
-          preferredRoles: profRes.data.user.preferredRoles || prev.preferredRoles || [],
+          ...u,
+          id: u._id || u.id,
+          resume: hasValidResume ? u.resume : null,
+          skills: u.skills || prev.skills || [],
+          preferredRoles: u.preferredRoles || prev.preferredRoles || [],
         }));
       }
 
@@ -78,9 +85,31 @@ export function StudentProvider({ children }) {
     }
   }, []);
 
+  // Sync student state whenever auth user changes
   useEffect(() => {
-    refreshBackendData();
-  }, [refreshBackendData]);
+    if (isAuthenticated && authUser && authUser.role === 'student') {
+      const hasValidResume = Boolean(authUser.resume && (authUser.resume.fileName || authUser.resume.originalName));
+      setProfile((prev) => {
+        // If switching to a different user, discard the old user's cached profile
+        if (prev.email && prev.email.toLowerCase() !== authUser.email.toLowerCase()) {
+          return {
+            ...authUser,
+            id: authUser._id || authUser.id,
+            resume: hasValidResume ? authUser.resume : null,
+            skills: authUser.skills || [],
+            preferredRoles: authUser.preferredRoles || [],
+          };
+        }
+        return {
+          ...prev,
+          ...authUser,
+          id: authUser._id || authUser.id,
+          resume: hasValidResume ? authUser.resume : prev.resume,
+        };
+      });
+      refreshBackendData();
+    }
+  }, [isAuthenticated, authUser, refreshBackendData]);
 
   // Save changes to localStorage for offline persistence
   useEffect(() => {
@@ -234,11 +263,29 @@ export function StudentProvider({ children }) {
       salaryRange: job.salaryRange,
       status: 'Applied',
       appliedAt: new Date().toISOString(),
+      student: {
+        _id: profile.id || profile._id,
+        name: profile.name,
+        email: profile.email,
+        college: profile.college,
+        degree: profile.degree,
+        branch: profile.branch,
+        graduationYear: profile.graduationYear,
+        cgpa: profile.cgpa,
+        skills: profile.skills || [],
+        resume: profile.resume,
+      },
+      resumeSnapshot: {
+        fileName: profile.resume?.fileName || `${(profile.name || 'Student').replace(/\s+/g, '_')}_Resume.pdf`,
+        originalName: profile.resume?.originalName || profile.resume?.fileName || `${(profile.name || 'Student').replace(/\s+/g, '_')}_Resume.pdf`,
+        size: profile.resume?.size || 1250000,
+        mimeType: 'application/pdf',
+      },
       statusHistory: [
         {
           status: 'Applied',
           date: new Date().toISOString(),
-          note: 'Application submitted with verified student profile.',
+          note: coverNote ? `Cover Note: ${coverNote}` : 'Application submitted with verified student profile.',
         },
       ],
     };
