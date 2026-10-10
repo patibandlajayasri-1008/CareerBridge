@@ -19,9 +19,10 @@ app.use(
       // Allow requests with no origin (e.g. mobile apps, curl, Postman)
       if (!origin) return callback(null, true);
 
-      // Explicitly allow configured client, localhost, and 127.0.0.1 on any dev port (5173, 5174, etc.)
+      // Explicitly allow configured client, localhost, any dev port, and all Vercel domains
       const isLocalhost = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
-      if (isLocalhost || origin === env.CLIENT_URL) {
+      const isVercel = /\.vercel\.app$/.test(origin) || origin.endsWith('.vercel.app');
+      if (isLocalhost || isVercel || origin === env.CLIENT_URL) {
         return callback(null, true);
       }
 
