@@ -32,6 +32,14 @@ const handleGracefulShutdown = (signal) => {
   });
 };
 
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[FATAL] Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('[FATAL] Uncaught Exception thrown:', err);
+});
+
 process.on('SIGTERM', () => handleGracefulShutdown('SIGTERM'));
 process.on('SIGINT', () => handleGracefulShutdown('SIGINT'));
 
