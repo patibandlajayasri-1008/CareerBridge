@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { UploadCloud, FileText, Trash2, CheckCircle2, AlertCircle } from 'lucide-react';
 import Button from '../common/Button';
+import { API_BASE_URL } from '../../services/api';
 
 export default function ResumeUploadZone({ resume, onResumeUpload, onResumeRemove }) {
   const [dragActive, setDragActive] = useState(false);
@@ -94,7 +95,7 @@ export default function ResumeUploadZone({ resume, onResumeUpload, onResumeRemov
           <div className="flex items-center gap-2 shrink-0">
             {resume.fileName && (
               <a
-                href={`http://localhost:5000/api/v1/users/resume/${encodeURIComponent(resume.fileName)}`}
+                href={`${API_BASE_URL}/users/resume/${encodeURIComponent(resume.fileName)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-white border border-[#E4E8F0] text-[#3157D5] hover:bg-[#F6F8FC] transition-colors"

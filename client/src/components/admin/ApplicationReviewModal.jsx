@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../../services/api';
 import Modal from '../common/Modal';
 import Button from '../common/Button';
 import Badge from '../common/Badge';
@@ -167,7 +168,7 @@ export default function ApplicationReviewModal({
                   </div>
                 </div>
                 <a
-                  href={`http://localhost:5000/api/v1/users/resume/${encodeURIComponent(resumeFileName)}`}
+                  href={`${API_BASE_URL}/users/resume/${encodeURIComponent(resumeFileName)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#3157D5] hover:bg-[#2444b0] text-white text-xs font-semibold transition-colors shrink-0"
