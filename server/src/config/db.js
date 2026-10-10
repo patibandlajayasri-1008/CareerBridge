@@ -21,10 +21,11 @@ export const connectDB = async () => {
     return conn;
   } catch (error) {
     console.error(`MongoDB Connection Failed: ${error.message}`);
-    // In production, failure to connect to database should be fatal
-    if (env.NODE_ENV === 'production') {
-      process.exit(1);
-    }
+    // Keep server running in cloud and schedule reconnect retry
+    setTimeout(() => {
+      console.log('Retrying MongoDB connection attempt in 5 seconds...');
+      connectDB().catch(() => {});
+    }, 5000);
     return null;
   }
 };

@@ -9,7 +9,7 @@ connectDB().catch((err) => {
   console.warn('MongoDB initial connection attempt deferred:', err.message);
 });
 
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`=======================================================`);
   console.log(`  CareerBridge Backend REST API Operational`);
   console.log(`  Environment : ${env.NODE_ENV}`);
